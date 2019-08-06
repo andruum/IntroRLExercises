@@ -1,3 +1,5 @@
+import math
+
 from Bandit import *
 import numpy
 import random
@@ -27,15 +29,15 @@ class UniformAlgorithm(Algorithm):
 
 class GreedyAlgorithm(Algorithm):
 
-    def __init__(self, e, totalnum, k, Q0 = 0):
-        self.Q = [Q0 for i in range(k)]
+    def __init__(self, e, totalnum, k):
+        self.Q = [0 for i in range(k)]
         self.N = [0 for i in range(k)]
         self.e = e
         self.totalnum = totalnum
 
     def generateDecision(self, totalbandits):
         rand = random.uniform(0, 1)
-        if self.e > rand:
+        if rand < self.e :
             bandit = random.randint(0, totalbandits-1)
             return bandit
         else:
@@ -49,7 +51,26 @@ class GreedyAlgorithm(Algorithm):
             self.Q[A] += (R-self.Q[A])/self.N[A]
         return numpy.where(self.Q == numpy.amax(self.Q))[0][0]
 
+class OptimisticGreedyAlgorithm(GreedyAlgorithm):
 
+    def __init__(self, e, totalnum, k, Q0):
+        super(OptimisticGreedyAlgorithm, self).__init__(e,totalnum,k)
+        self.Q = [Q0 for i in range(k)]
+
+class UpperConfidenceAlgorithm(GreedyAlgorithm):
+
+    def __init__(self, e, totalnum, k, c):
+        super(UpperConfidenceAlgorithm, self).__init__(e,totalnum,k)
+        self.c = c
+
+    def generateDecision(self, totalbandits):
+        t = sum(self.N)+1
+        tempQ = []
+        for i in range(len(self.Q)):
+            if self.N[i] == 0:
+                return i
+            tempQ.append(self.Q[i] + self.c*math.sqrt(t/self.N[i]))
+        return numpy.where(tempQ == numpy.amax(tempQ))[0][0]
 
 
 if __name__ == '__main__':
@@ -60,6 +81,6 @@ if __name__ == '__main__':
     bandits.append(RangeBandit(3, 5))
     bandits.append(RangeBandit(3, 6))
 
-    algo = GreedyAlgorithm(0.1, 1000, len(bandits), 0)
+    algo = UpperConfidenceAlgorithm(0, 1000, len(bandits), 2)
 
     print(algo.evaluate(bandits)+1)
