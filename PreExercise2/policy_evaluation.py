@@ -85,6 +85,7 @@ if __name__ == '__main__':
     delta = 0
 
     while True:
+        delta = 0
         for y in range(0, ROWS):
             for x in range(0, COLUMNS):
                 state  = State(x,y)
@@ -92,12 +93,12 @@ if __name__ == '__main__':
                     v = V[y][x]
                     action = GetNextAction(state)
                     reward = GetReward(state, action)
-                    next   = GetNextState(state, action)
+                    next = GetNextState(state, action)
                     if not next.is_outside_environment:
                         V[y][x] = reward + discount_rate * V[next.y][next.x]
                     delta = max(delta, abs(v - V[y][x]))
         sweep += 1
         print("Sweep #", sweep, "delta", delta)
         PrintStateValues()
-        if delta > theta:
+        if delta < theta:
             break
