@@ -43,6 +43,7 @@ class GreedyAlgorithm(Algorithm):
         else:
             return numpy.where(self.Q == numpy.amax(self.Q))[0][0]
 
+
     def evaluate(self, bandits):
         for i in range(self.totalnum):
             A = self.generateDecision(len(bandits))
@@ -79,9 +80,16 @@ if __name__ == '__main__':
     bandits.append(ConstantBandit(1))
     bandits.append(ConstantBandit(3))
     bandits.append(RangeBandit(3, 5))
-    bandits.append(RangeBandit(3, 6))
+    bandits.append(RangeBandit(-10, 10))
+    bandits.append(RangeBandit(-3, 6))
+    bandits.append(ConstantBandit(-1))
+    bandits.append(ConstantBandit(0))
+    bandits.append(RangeBandit(-1,1))
+    bandits.append(RangeBandit(-20,20))
+    bandits.append(RangeBandit(-2,3))
 
     algo = UpperConfidenceAlgorithm(0, 1000, len(bandits), 2)
 
+
+
     print(algo.evaluate(bandits)+1)
-    print("dab")
