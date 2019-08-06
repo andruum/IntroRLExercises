@@ -63,3 +63,4 @@ if __name__ == '__main__':
     algo = GreedyAlgorithm(0.1, 1000, len(bandits), 0)
 
     print(algo.evaluate(bandits)+1)
+    print("dab")
