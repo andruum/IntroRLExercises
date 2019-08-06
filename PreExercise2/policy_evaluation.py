@@ -1,306 +1,103 @@
-# include <algorithm>
-# include <iostream>
-# include <string>
-# include <stdio.h>
-# include <math.h>
+from copy import deepcopy
+from enum import Enum
 
-/ **
-*Basic
-implementation
-of
-iterative
-policy
-evaluation(see
-p.
-75 in Sutton
-* and Barto(2018)
-"Reinformcement Learning, an Introduction") for a deterministic
-    *2
-    D
-    lattice
-    environment.
-*
-*Note: works
-only
-for determinsitic policies as the "GetAction()" function
-*returns
-only
-a
-single
-action.It is, however, straightforward
-to
-*extend.
-*
-*Written
-2018
-by
-Anders
-Lyhne
-Christensen.
-** /
+COLUMNS = 4
+ROWS = 3
 
-// Dimensions
-of
-the
-environment
-# define COLUMNS 4
-# define ROWS 3
+environment = [ [ ' ', ' ', ' ', '+' ],
+                [ ' ', '#', ' ', '-' ],
+                [ ' ', ' ', ' ', ' ' ] ]
 
-// Environment - - spaces: agent
-can
-move, "+": reward, "-": punishment.
-char
-environment[ROWS][COLUMNS] = {{' ', ' ', ' ', '+'},
-                              {' ', '#', ' ', '-'},
-                              {' ', ' ', ' ', ' '}};
+V = [[0 for i in range(4)] for i in range(3)]
 
-// Current
-estimate
-of
-state
-values
-under
-the
-current
-policy:
-float
-V[ROWS][COLUMNS];
+class State:
+    def __init__(self, x=0, y=0, outside=False):
+        self.x = x
+        self.y = y
+        self.is_outside_environment = outside
 
-// State is given
-by(x, y) in the
-environment.Must
-be
-inside
-the
-environment
-to
-be
-valid
-struct
-state
-{
-    int
-x;
-int
-y;
-bool
-is_outside_environment;
-};
 
-// A
-convenient
-definition
-of
-the
-terminal
-state
-const
-state
-TERMINAL_STATE = {-1, -1, true};
+TERMINAL_STATE = State(-1,-1,True)
 
-// Discount
-rate:
-float
-discount_rate = 0.9;
+discount_rate = 0.9
+theta = 0.01
 
-// Theta: the
-thredhold
-for determining the accuracy of the estimation
-float
-theta = 0.01;
+class Actions(Enum):
+    UP = 0
+    DOWN = 1
+    LEFT = 2
+    RIGHT = 3
 
-// Actions:
-enum
-action
-{UP, DOWN, LEFT, RIGHT};
+def GetNextState(state, action):
+    state = deepcopy(state)
+    if (environment[state.y][state.x] != ' '):
+        return TERMINAL_STATE
+    if action == Actions.UP:
+        state.y -= 1
+    elif action == Actions.DOWN:
+        state.y += 1
+    elif action == Actions.LEFT:
+        state.x -= 1
+    elif action == Actions.RIGHT:
+        state.x += 1
 
-// Get
-the
-next
-state
-given
-a
-current
-state
-s and an
-action
-a:
-state
-GetNextState(state
-s, action
-a)
-{
-if (environment[s.y][s.x] != ' ')
-return TERMINAL_STATE;
+    if state.x < 0 or state.y < 0 or state.x >= COLUMNS or state.y >= ROWS:
+        return TERMINAL_STATE
+    state.is_outside_environment = False
+    return state
 
-switch(a)
-{
-    case
-UP: s.y -= 1;
-break;
-case
-DOWN: s.y += 1;
-break;
-case
-LEFT: s.x -= 1;
-break;
-case
-RIGHT: s.x += 1;
-break;
-}
+def GetReward(state, action):
+    next = GetNextState(state, action)
+    if next.is_outside_environment:
+        return 0
+    else:
+        if environment[next.y][next.x] == '+':
+            return 1.0
+        if environment[next.y][next.x] == '-':
+            return -1.0
+        return 0
 
-if (s.x < 0 | | s.y < 0 | | s.x >= COLUMNS | | s.y >= ROWS)
-    return TERMINAL_STATE;
+def GetNextAction(state):
+    return Actions.RIGHT
 
-s.is_outside_environment = false;
-return s;
-}
 
-// Ger
-the
-reward
-given
-a
-state and an
-action:
-float
-GetReward(state
-s, action
-a)
-{
-state
-next = GetNextState(s, a);
-if (next.is_outside_environment)
-    {
-return 0;
-} else {
-if (environment[next.y][next.x] == '+')
-    return 1.0;
+def PrintEnvironment():
+    for y in range(-1,ROWS+1):
+        for x in range(-1,COLUMNS+1):
+            if (y < 0 or y >= ROWS or x < 0 or x >= COLUMNS):
+                print("#", end='')
+            else:
+                print(environment[y][x], end='')
+        print("")
 
-if (environment[next.y][next.x] == '-')
-    return -1.0;
 
-return 0;
-}
-}
+def PrintStateValues():
+    for y in range(0, ROWS):
+        for x in range(0, COLUMNS):
+            print(" ",V[y][x], " ", end='')
+        print("")
 
-// Get
-the
-next
-action
-according
-to
-the
-current
-policy:
-action
-GetNextAction(state
-s)
-{
-return RIGHT;
-}
+if __name__ == '__main__':
+    print("Environment:")
+    PrintEnvironment()
 
-// Print
-the
-environment
-with border around:
-    void
-PrintEnvironment()
-{
-for (int y = -1; y <= ROWS; y++)
-    {
-    for (int x = -1; x <= COLUMNS; x++)
-    if (y < 0 | | y >= ROWS | | x < 0 | | x >= COLUMNS)
-    std: :
-        cout << "#";
-    else
-    std::cout << environment[y][x];
+    sweep = 0
+    delta = 0
 
-    std::cout << std::endl;
-    }
-    }
-
-    // Print
-    the
-    current
-    estimate
-    of
-    state
-    values:
-    void
-    PrintStateValues()
-    {
-    for (int y = 0; y < ROWS; y++)
-        {
-        for (int x = 0; x < COLUMNS; x++)
-        printf(" %5.2f ", V[y][x]);
-
-        printf("\n");
-        }
-    }
-
-    int
-    main(int
-    argc, char ** argv)
-    {
-    std::cout << "Environment:" << std::endl;
-    PrintEnvironment();
-
-    // Reset
-    all
-    state
-    value
-    estimates
-    to
-    0:
-    for (int y = 0; y < ROWS; y++)
-        for (int x = 0; x < COLUMNS; x++)
-            V[y][x] = 0;
-
-    int
-    sweep = 0;
-    float
-    delta;
-
-    // Start
-    of
-    the
-    estimation
-    loop
-    do
-    {
-        delta = 0;
-    // Perform
-    a
-    full
-    sweep
-    over
-    the
-    whole
-    state
-    space:
-    for (int y = 0; y < ROWS; y++)
-    {
-    for (int x = 0; x < COLUMNS; x++)
-    {
-    state s = {x, y};
-    if (environment[y][x] == ' ')
-    {
-    float v      = V[y][x];
-    action a     = GetNextAction(s);
-    float reward = GetReward(s, a);
-    state next   = GetNextState(s, a);
-    if (!next.is_outside_environment)
-    V[y][x] = reward + discount_rate * V[next.y][next.x];
-
-    delta = std::
-        max(delta, (float)
-    fabs(v - V[y][x]));
-    }
-    }
-    }
-
-    std::cout << "Sweep #" << ++sweep << " delta: " << delta << std::endl;
-    PrintStateValues();
-    } while (delta > theta); // Check if our currect estimate is accurate enough.
-    };
+    while True:
+        for y in range(0, ROWS):
+            for x in range(0, COLUMNS):
+                state  = State(x,y)
+                if environment[y][x] == ' ':
+                    v = V[y][x]
+                    action = GetNextAction(state)
+                    reward = GetReward(state, action)
+                    next   = GetNextState(state, action)
+                    if not next.is_outside_environment:
+                        V[y][x] = reward + discount_rate * V[next.y][next.x]
+                    delta = max(delta, abs(v - V[y][x]))
+        sweep += 1
+        print("Sweep #", sweep, "delta", delta)
+        PrintStateValues()
+        if delta > theta:
+            break
