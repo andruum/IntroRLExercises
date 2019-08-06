@@ -84,3 +84,4 @@ if __name__ == '__main__':
     algo = UpperConfidenceAlgorithm(0, 1000, len(bandits), 2)
 
     print(algo.evaluate(bandits)+1)
+    print("dab")
