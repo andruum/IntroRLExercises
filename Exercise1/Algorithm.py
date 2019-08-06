@@ -80,21 +80,21 @@ class UpperConfidenceAlgorithm(GreedyAlgorithm):
 if __name__ == '__main__':
     bandits = []
 
+    bandits.append(ConstantBandit(-1))
+    bandits.append(RangeBandit(-10, 10))
+    bandits.append(RangeBandit(-3, 6))
+    bandits.append(ConstantBandit(-1))
+    bandits.append(ConstantBandit(0))
+    bandits.append(RangeBandit(-1,1))
+    bandits.append(RangeBandit(-20,20))
+    bandits.append(RangeBandit(-2,3))
     bandits.append(ConstantBandit(2))
-    bandits.append(RangeBandit(1, 3))
-    # bandits.append(ConstantBandit(3))
-    # bandits.append(RangeBandit(-10, 10))
-    # bandits.append(RangeBandit(-3, 6))
-    # bandits.append(ConstantBandit(-1))
-    # bandits.append(ConstantBandit(0))
-    # bandits.append(RangeBandit(-1,1))
-    # bandits.append(RangeBandit(-20,20))
-    # bandits.append(RangeBandit(-2,3))
+    bandits.append(RangeBandit(3, 4))
 
     totalsteps = 1000
 
-    algo1 = GreedyAlgorithm(0.1, totalsteps, len(bandits))
-    algo2 = OptimisticGreedyAlgorithm(0, totalsteps, len(bandits), 20)
+    algo1 = GreedyAlgorithm(0.05, totalsteps, len(bandits))
+    algo2 = OptimisticGreedyAlgorithm(0, totalsteps, len(bandits), 4)
     algo3 = UpperConfidenceAlgorithm(0, totalsteps, len(bandits), 0.2)
 
     best1 = algo1.evaluate(bandits)
@@ -112,4 +112,4 @@ if __name__ == '__main__':
 
     plt.legend()
     # plt.show()
-    plt.savefig('plot2.png')
+    plt.savefig('plot2-better.png')
