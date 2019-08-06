@@ -80,16 +80,16 @@ class UpperConfidenceAlgorithm(GreedyAlgorithm):
 if __name__ == '__main__':
     bandits = []
 
-    bandits.append(ConstantBandit(1))
-    bandits.append(RangeBandit(4, 6))
-    bandits.append(ConstantBandit(3))
-    bandits.append(RangeBandit(-10, 10))
-    bandits.append(RangeBandit(-3, 6))
-    bandits.append(ConstantBandit(-1))
-    bandits.append(ConstantBandit(0))
-    bandits.append(RangeBandit(-1,1))
-    bandits.append(RangeBandit(-20,20))
-    bandits.append(RangeBandit(-2,3))
+    bandits.append(ConstantBandit(2))
+    bandits.append(RangeBandit(1, 3))
+    # bandits.append(ConstantBandit(3))
+    # bandits.append(RangeBandit(-10, 10))
+    # bandits.append(RangeBandit(-3, 6))
+    # bandits.append(ConstantBandit(-1))
+    # bandits.append(ConstantBandit(0))
+    # bandits.append(RangeBandit(-1,1))
+    # bandits.append(RangeBandit(-20,20))
+    # bandits.append(RangeBandit(-2,3))
 
     totalsteps = 1000
 
@@ -111,4 +111,5 @@ if __name__ == '__main__':
     plt.ylabel('Awerage reward')
 
     plt.legend()
-    plt.show()
+    # plt.show()
+    plt.savefig('plot2.png')
