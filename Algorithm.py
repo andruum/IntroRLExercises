@@ -32,7 +32,9 @@ class GreedyAlgorithm(Algorithm):
     def __init__(self, e, totalnum, k):
         self.Q = [0 for i in range(k)]
         self.N = [0 for i in range(k)]
+        self.data = []
         self.e = e
+        self.temp = 0
         self.totalnum = totalnum
 
     def generateDecision(self, totalbandits):
@@ -49,6 +51,8 @@ class GreedyAlgorithm(Algorithm):
             R = bandits[A].pull()
             self.N[A] += 1
             self.Q[A] += (R-self.Q[A])/self.N[A]
+            self.temp += R
+            self.data.append(self.temp/sum(self.N))
         return numpy.where(self.Q == numpy.amax(self.Q))[0][0]
 
 class OptimisticGreedyAlgorithm(GreedyAlgorithm):
@@ -81,7 +85,7 @@ if __name__ == '__main__':
     bandits.append(RangeBandit(3, 5))
     bandits.append(RangeBandit(3, 6))
 
-    algo = UpperConfidenceAlgorithm(0, 1000, len(bandits), 2)
+    algo = GreedyAlgorithm(0.20, 100000, len(bandits),)
 
     print(algo.evaluate(bandits)+1)
-    print("dab")
+    print(algo.data[-1])
