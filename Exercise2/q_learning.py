@@ -1,4 +1,5 @@
 import operator
+import random
 from copy import deepcopy
 from enum import Enum
 
@@ -8,8 +9,8 @@ COLUMNS = 4
 ROWS = 3
 
 environment = [ [ ' ', ' ', ' ', '+' ],
-                [ ' ', '#', ' ', '-' ],
-                [ ' ', ' ', ' ', ' ' ] ]
+                [ '#', '#', '#', '#' ],
+                [ ' ', ' ', ' ', '+' ] ]
 
 V = [[0 for i in range(4)] for i in range(3)]
 
@@ -21,7 +22,7 @@ class State:
     def __hash__(self):
         return hash(str(self.x)+" "+str(self.y))
     def __eq__(self, other):
-        return self.x == other.x and self.y == other.y and self.is_outside_environment==other.is_outside_environment
+        return self.x == other.x and self.y == other.y
 
 TERMINAL_STATE = State(-1,-1,True)
 
@@ -36,8 +37,7 @@ class Actions(Enum):
 
 def GetNextState(state, action):
     state = deepcopy(state)
-    if (environment[state.y][state.x] != ' '):
-        return TERMINAL_STATE
+
     if action == Actions.UP:
         state.y -= 1
     elif action == Actions.DOWN:
@@ -49,7 +49,12 @@ def GetNextState(state, action):
 
     if state.x < 0 or state.y < 0 or state.x >= COLUMNS or state.y >= ROWS:
         return TERMINAL_STATE
-    state.is_outside_environment = False
+
+    if (environment[state.y][state.x] != ' '):
+        state.is_outside_environment = True
+    else:
+        state.is_outside_environment = False
+
     return state
 
 def GetReward(state, action):
@@ -61,11 +66,11 @@ def GetReward(state, action):
             return 1.0
         if environment[next.y][next.x] == '-':
             return -1.0
-        return 0
+        return -0.01
 
 def GetNextAction(state_action_values, epsilon):
     probabilites = deepcopy(state_action_values)
-
+    print(state_action_values)
     max_action = max(state_action_values.items(), key=operator.itemgetter(1))[0]
 
     for action in state_action_values:
@@ -79,6 +84,7 @@ def GetNextAction(state_action_values, epsilon):
         p.append(float(prob))
 
     best_action_id = np.random.choice(len(probabilites.keys()), 1, p=p)[0]
+    print(p)
     return list(state_action_values.keys())[best_action_id]
 
 
@@ -110,21 +116,24 @@ if __name__ == '__main__':
     for y in range(0, ROWS):
         for x in range(0, COLUMNS):
             state = State(x, y)
-            Q[state] = {Actions.RIGHT:0, Actions.LEFT:0, Actions.DOWN:0, Actions.UP:0}
+            Q[state] = {Actions.RIGHT:random.uniform(0, 1), Actions.LEFT:random.uniform(0, 1), Actions.DOWN:random.uniform(0, 1), Actions.UP:random.uniform(0, 1)}
 
-    epsilon = 0.1
-    alpha = 0.4
-    sigma = 0.9
-    episodes = 8
+    epsilon = 0
+    alpha = 2
+    sigma = 0.4
+    episodes = 50
     for ep in range(episodes):
         state = State(0,2)
 
-        while state not in final_states:
+        if ep == episodes - 1:
+            print("Final episode")
+
+        while state not in final_states and not state.is_outside_environment:
             action = GetNextAction(Q[state],epsilon)
             reward = GetReward(state,action)
             next = GetNextState(state,action)
 
-            max_next_state_value = 0
+            max_next_state_value = -1
             if not next.is_outside_environment:
                 max_next_state = Q[next]
                 max_next_state_value = max(max_next_state.items(), key=operator.itemgetter(1))[1]
@@ -135,6 +144,3 @@ if __name__ == '__main__':
                 print(state.x, state.y, action)
 
             state = next
-
-
-
