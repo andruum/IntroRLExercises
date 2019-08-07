@@ -1,7 +1,11 @@
 import math
 
 from Bandit import *
+<<<<<<< Updated upstream:Algorithm.py
 import numpy
+=======
+import numpy as np
+>>>>>>> Stashed changes:Exercise1/Algorithm.py
 import random
 import operator
 
@@ -83,5 +87,11 @@ if __name__ == '__main__':
 
     algo = UpperConfidenceAlgorithm(0, 1000, len(bandits), 2)
 
+<<<<<<< Updated upstream:Algorithm.py
     print(algo.evaluate(bandits)+1)
     print("dab")
+=======
+    plt.legend()
+    plt.show()
+    plt.savefig('plot2-better.png')
+>>>>>>> Stashed changes:Exercise1/Algorithm.py
