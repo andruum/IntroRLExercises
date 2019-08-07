@@ -9,7 +9,9 @@ import numpy as np
 
 environment = [ [ ' ', '-', ' ', ' ', ' ' ],
                 [ ' ', '#', ' ', '#', ' ' ],
-                [ ' ', ' ', ' ', '#', '+' ] ]
+                [ ' ', ' ', ' ', '#', '+' ],
+                [ ' ', ' ', ' ', '#', ' ' ],
+                [ ' ', ' ', ' ', ' ', ' ' ]]
 
 COLUMNS = len(environment[0])
 ROWS = len(environment)
@@ -66,6 +68,8 @@ def GetReward(state, action):
     else:
         if environment[next.y][next.x] == '+':
             return 1.0
+        if environment[next.y][next.x] == '@':
+            return 0.5
         if environment[next.y][next.x] == '-':
             return -1.0
         return -0.1
@@ -114,6 +118,8 @@ def CheckTermination(state):
     if environment[state.y][state.x] == '-':
         return True
 
+
+
 if __name__ == '__main__':
     print("Environment:")
     PrintEnvironment()
@@ -126,13 +132,14 @@ if __name__ == '__main__':
 
     epsilon = 0.1
     alpha = 0.9
-    sigma = 0.5
-    episodes = 30
+    sigma = 0.8
+    episodes = 100
     for ep in range(episodes):
         state = State(0,2)
 
         if ep == episodes - 1:
             print("Final episode")
+            epsilon = 0.0
 
         while not CheckTermination(state):
             action = GetNextAction(Q[state],epsilon)
