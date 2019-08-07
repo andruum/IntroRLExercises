@@ -5,14 +5,16 @@ from enum import Enum
 
 import numpy as np
 
-COLUMNS = 4
-ROWS = 3
 
-environment = [ [ ' ', ' ', ' ', '+' ],
-                [ ' ', '#', ' ', '-' ],
-                [ ' ', ' ', ' ', ' ' ] ]
 
-V = [[0 for i in range(4)] for i in range(3)]
+environment = [ [ ' ', '-', ' ', ' ', ' ' ],
+                [ ' ', '#', ' ', '#', ' ' ],
+                [ ' ', ' ', ' ', '#', '+' ] ]
+
+COLUMNS = len(environment[0])
+ROWS = len(environment)
+
+V = [[0 for i in range(COLUMNS)] for i in range(ROWS)]
 
 class State:
     def __init__(self, x=0, y=0, outside=False):
