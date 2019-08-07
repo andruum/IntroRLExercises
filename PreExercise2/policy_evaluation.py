@@ -58,7 +58,17 @@ def GetReward(state, action):
         return 0
 
 def GetNextAction(state):
-    return Actions.RIGHT
+    bestaction = None
+    maxvalue = -float('Inf')
+    for act in Actions:
+        reward = GetReward(state, act)
+        next = GetNextState(state, act)
+        if not next.is_outside_environment:
+            v = reward + discount_rate * V[next.y][next.x]
+            if maxvalue<v:
+                bestaction = act
+                maxvalue = v
+    return bestaction
 
 
 def PrintEnvironment():
