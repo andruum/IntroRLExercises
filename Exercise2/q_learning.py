@@ -5,33 +5,18 @@ from enum import Enum
 
 import numpy as np
 
-
-
-environment = [ [ ' ', '-', ' ', ' ', ' ' ],
-                [ ' ', '#', ' ', '#', ' ' ],
-                [ ' ', ' ', ' ', '#', '+' ],
-                [ ' ', ' ', ' ', '#', ' ' ],
-                [ ' ', ' ', ' ', ' ', ' ' ]]
-
-COLUMNS = len(environment[0])
-ROWS = len(environment)
-
-V = [[0 for i in range(COLUMNS)] for i in range(ROWS)]
-
 class State:
+
     def __init__(self, x=0, y=0, outside=False):
         self.x = x
         self.y = y
         self.is_outside_environment = outside
+
     def __hash__(self):
         return hash(str(self.x)+" "+str(self.y))
+
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
-
-TERMINAL_STATE = State(-1,-1,True)
-
-discount_rate = 0.9
-theta = 0.01
 
 class Actions(Enum):
     UP = 0
@@ -39,8 +24,28 @@ class Actions(Enum):
     LEFT = 2
     RIGHT = 3
 
+                #x=0   x=1  @x=2  x=3  @x=4   x=5  x=6  x=7
+environment = [ [ ' ', '-', ' ', '#', ' ',  ' ', ' ', ' '], #y=0@
+                [ ' ', '#', '-', '#', ' ',  ' ', ' ', ' '], #y=1
+                [ ' ', '#', ' ', '#', ' ',  '#', ' ', ' '], #y=2
+                [ ' ', '#', ' ', '#', '+',  '#', ' ', ' '], #y=3
+                [ ' ', ' ', ' ', '#', ' ',  '#', ' ', ' '], #y=4
+                [ '#', '#', ' ', '#', '-',  '#', '#', ' '], #y=5
+                [ ' ', ' ', ' ', '#', ' ',  ' ', ' ', ' '], #y=6@
+                [ ' ', '#', '#', '#', ' ',  ' ', ' ', ' '], #y=7
+                [ ' ', ' ', ' ', ' ', ' ',  ' ', ' ', ' ']] #y=8
+
+COLUMNS = len(environment[0])
+ROWS = len(environment)
+TERMINAL_STATE = State(-1,-1,True)
+teleports = {State(2,0):State(4,6),}
+
+
 def GetNextState(state, action):
     state = deepcopy(state)
+
+    if state in teleports:
+        return teleports[state]
 
     if action == Actions.UP:
         state.y -= 1
@@ -68,11 +73,9 @@ def GetReward(state, action):
     else:
         if environment[next.y][next.x] == '+':
             return 1.0
-        if environment[next.y][next.x] == '@':
-            return 0.5
         if environment[next.y][next.x] == '-':
             return -1.0
-        return -0.1
+        return -0.3
 
 def GetNextAction(state_action_values, epsilon):
     probabilites = deepcopy(state_action_values)
@@ -115,45 +118,66 @@ def CheckTermination(state):
         return True
     if environment[state.y][state.x] == '+':
         return True
-    if environment[state.y][state.x] == '-':
-        return True
-
-
 
 if __name__ == '__main__':
     print("Environment:")
     PrintEnvironment()
 
     Q = {}
+    N_visits = {}
     for y in range(0, ROWS):
         for x in range(0, COLUMNS):
             state = State(x, y)
             Q[state] = {Actions.RIGHT:0, Actions.LEFT:0, Actions.DOWN:0, Actions.UP:0}
+            N_visits[state] = 0
 
-    epsilon = 0.1
-    alpha = 0.9
-    sigma = 0.8
-    episodes = 100
-    for ep in range(episodes):
+    epsilon = 0.0
+    learning_rate = 0.9
+    discount_rate = 0.2
+
+    theta = 0.001
+
+    last_episode = False
+    last_evaluate = False
+
+    episode = 0
+    while not last_episode or not last_evaluate:
         state = State(0,2)
 
-        if ep == episodes - 1:
-            print("Final episode")
+        episode += 1
+
+        if last_episode:
+            print("Final episode #", episode)
             epsilon = 0.0
+            last_evaluate = True
+
+        max_delta = 0.0
 
         while not CheckTermination(state):
+            if not last_episode:
+                N_visits[state] += 1
+                epsilon = 1.0/N_visits[state]
+
             action = GetNextAction(Q[state],epsilon)
             reward = GetReward(state,action)
             next = GetNextState(state,action)
 
-            max_next_state_value = -1
+            max_next_state_value = -1000.0
             if not next.is_outside_environment:
                 max_next_state = Q[next]
                 max_next_state_value = max(max_next_state.items(), key=operator.itemgetter(1))[1]
 
-            Q[state][action] = Q[state][action] + alpha*(reward+sigma*max_next_state_value-Q[state][action])
+            startq = Q[state][action]
+            Q[state][action] = Q[state][action] + learning_rate * (reward + discount_rate * max_next_state_value - Q[state][action])
+            delta = abs(Q[state][action]-startq)
 
-            if ep == episodes-1:
+            if(delta>max_delta):
+                max_delta = delta
+
+            if last_episode:
                 print(state.x, state.y, action)
 
             state = next
+
+        if max_delta <= theta:
+            last_episode = True
