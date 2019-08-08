@@ -75,7 +75,7 @@ def GetReward(state, action):
             return 1.0
         if environment[next.y][next.x] == '-':
             return -1.0
-        return -0.3
+        return -0.1
 
 def GetNextAction(state_action_values, epsilon):
     probabilites = deepcopy(state_action_values)
@@ -132,10 +132,10 @@ if __name__ == '__main__':
             N_visits[state] = 0
 
     epsilon = 0.0
-    learning_rate = 0.9
-    discount_rate = 0.2
+    learning_rate = 0.5
+    discount_rate = 0.5
 
-    theta = 0.001
+    theta = 0.00001
 
     last_episode = False
     last_evaluate = False
