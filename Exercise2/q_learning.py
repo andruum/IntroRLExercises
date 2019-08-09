@@ -103,12 +103,6 @@ def PrintEnvironment():
                 print(environment[y][x], end='')
         print("")
 
-def PrintStateValues():
-    for y in range(0, ROWS):
-        for x in range(0, COLUMNS):
-            print(" ",V[y][x], " ", end='')
-        print("")
-
 def CheckTermination(state):
     if state == TERMINAL_STATE:
         return True
