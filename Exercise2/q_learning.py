@@ -39,7 +39,7 @@ COLUMNS = len(environment[0])
 ROWS = len(environment)
 TERMINAL_STATE = State(-1,-1,True)
 teleports = {State(2,0):State(4,6),}
-
+START_POINT = State(0,2)
 
 def GetNextState(state, action):
     state = deepcopy(state)
@@ -126,8 +126,8 @@ if __name__ == '__main__':
             N_visits[state] = 0
 
     epsilon = 0.0
-    learning_rate = 0.5
-    discount_rate = 0.5
+    learning_rate = 0.05
+    discount_rate = 0.99
 
     theta = 0.00001
 
@@ -136,10 +136,10 @@ if __name__ == '__main__':
 
     episode = 0
     while not last_episode or not last_evaluate:
-        state = State(0,2)
+        state = START_POINT
 
         episode += 1
-
+        total_reward = 0.0
         if last_episode:
             print("Final episode #", episode)
             epsilon = 0.0
@@ -155,7 +155,7 @@ if __name__ == '__main__':
             action = GetNextAction(Q[state],epsilon)
             reward = GetReward(state,action)
             next = GetNextState(state,action)
-
+            total_reward += reward
             max_next_state_value = -1000.0
             if not next.is_outside_environment:
                 max_next_state = Q[next]
@@ -172,6 +172,10 @@ if __name__ == '__main__':
                 print(state.x, state.y, action)
 
             state = next
+
+
+        if last_episode:
+            print("Total reward =", total_reward)
 
         if max_delta <= theta:
             last_episode = True
