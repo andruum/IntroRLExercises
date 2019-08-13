@@ -31,21 +31,31 @@ class RBF:
         for i in range(nx):
             for j in range(nv):
                 self.features.append(RBFFeature(deltax,deltav,i,j,vm))
-        self.weights = np.random.uniform(low=-1, high=1, size=(nx*nv,))
+        self.weights = np.random.uniform(low=-1, high=1, size=(nx*nv,)).reshape((nx*nv,1))
 
-    def feed(self, state):
+    def getFeatureVector(self,state):
         input_features = []
         for i in range(len(self.features)):
             input_features.append(self.features[i].calc(state))
-        input_features = np.asarray(input_features).reshape((len(self.features),1))
-        res = self.weights.transpose().dot(input_features)
+        input_features = np.asarray(input_features).reshape((len(self.features), 1))
+        return input_features
+
+    def feed(self, state):
+        input = self.getFeatureVector(state)
+        res = self.weights.transpose().dot(input)
         return res
 
 if __name__ == '__main__':
     learning_rate = 0.9
 
     g = 9.8
-    h = 5
+    m = 1
+    h = 1
+    T = 0.05
+    am = 4
+    ksi = 1
+    alpha = 0.4
+    tf = 10
     nx = 5
     nv = 5
     L = 4
@@ -54,11 +64,28 @@ if __name__ == '__main__':
     Q = {-1:RBF(nx,nv,L,vm), 1:RBF(nx,nv,L,vm)}
 
     episode = 0
-    epsilon0 = 0
-    error = 1.0
-    while error>0.001:
+    epsilon0 = 0.9
+
+    curTime = 0
+    while episode<10:
         episode+=1
         epsilon = epsilon0/episode
 
         st = [L/2,0]
         at = int(getNextAction(Q, st, epsilon))
+
+        while curTime<tf and st[0] < L:
+            stnext, rnext = simulator.step(at)
+
+            if stnext[0]>=L:
+                W = Q[at].weights
+                W = W + alpha*(rnext-Q[at].feed(st))*Q[at].getFeatureVector(st)
+                Q[at].weights = W
+                break
+            
+            anext = int(getNextAction(Q, stnext, epsilon))
+            W = Q[at].weights
+            W = W + alpha * (rnext + ksi*Q[anext].feed(stnext) - Q[at].feed(st)) * Q[at].getFeatureVector(st)
+            Q[at].weights = W
+            st = stnext
+            at = anext
