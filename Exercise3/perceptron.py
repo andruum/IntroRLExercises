@@ -4,20 +4,8 @@ from copy import deepcopy
 import math
 import numpy as np
 
-def linear(z):
-    return z
-
-def tlu(z):
-    if z > 0:
-        return 1
-    else:
-        return 0
-
 def sigmoid(z):
     return 1/(1+math.exp(-z))
-
-def hyper_tangent(z):
-    return math.exp(z) - math.exp(-z) / (math.exp(z) + math.exp(-z))
 
 class Perceptron:
 
@@ -100,7 +88,6 @@ class MLP:
 u = [[0,0], [0,1], [1,0], [1,1]]
 t = [[0],[1],[1],[0]]
 
-
 if __name__ == '__main__':
     hidden_perc_1 = Perceptron(2,sigmoid)
     hidden_perc_2 = Perceptron(2,sigmoid)
@@ -117,31 +104,7 @@ if __name__ == '__main__':
         for i in ids:
             v = mlp.feed(u[i])
             error += mlp.back_propagate(t[i],learning_rate)
-        # print(error)
 
     for i in range(4):
         v = mlp.feed(u[i])
         print(v)
-        #todo draw decision boundary
-
-
-if __name__ == '__main1__':
-    perc = Perceptron(2,sigmoid)
-
-    learning_rate = 0.1
-    error = 1.0
-    while error > 0.001:
-        error = 0.0
-        for i in range(4):
-            v = perc.feed(u[i])
-
-            for j in range(len(perc.w) - 1):
-                perc.w[j] = perc.w[j] + learning_rate * v*(1-v)* (t[i][0]-v)*u[i][j]
-            perc.w[-1] = perc.w[-1] + learning_rate * v*(1-v)* (t[i][0]-v) * (-1)
-
-            error += 0.5*(t[i][0]-v)**2
-
-    for i in range(4):
-        v = perc.feed(u[i])
-        print(v)
-        #todo draw decision boundary
