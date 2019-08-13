@@ -1,18 +1,16 @@
 import random
-
 import math
 import numpy as np
 
-def getNextAction(Q, epsilon):
-    Qpos = Q[1]
-    Qneg = Q[-1]
+def getNextAction(Q, state, epsilon):
+    Qpos = Q[1].feed(state)
+    Qneg = Q[-1].feed(state)
     u = 1
     if Qneg>Qpos:
         u = -1
     else:
         u = 1
-    rand = random.uniform(0,1)
-    if epsilon<rand:
+    if epsilon<random.uniform(0,1):
         u = np.sign(random.uniform(-1,1))
     return u
 
@@ -36,13 +34,15 @@ class RBF:
         self.weights = np.random.uniform(low=-1, high=1, size=(nx*nv,))
 
     def feed(self, state):
-        input_features = np.fromfunction(lambda i: self.features[i].calc(state),len(self.features))
-        res = self.weights.transpose()*input_features
+        input_features = []
+        for i in range(len(self.features)):
+            input_features.append(self.features[i].calc(state))
+        input_features = np.asarray(input_features).reshape((len(self.features),1))
+        res = self.weights.transpose().dot(input_features)
         return res
 
 if __name__ == '__main__':
     learning_rate = 0.9
-
 
     g = 9.8
     h = 5
@@ -51,12 +51,14 @@ if __name__ == '__main__':
     L = 4
     vm = math.sqrt(2*g*h)
 
-    Q = {}
-    Q[-1] = RBF(nx,nv,L,vm)
-    Q[1] = RBF(nx,nv,L,vm)
+    Q = {-1:RBF(nx,nv,L,vm), 1:RBF(nx,nv,L,vm)}
 
-
+    episode = 0
+    epsilon0 = 0
     error = 1.0
     while error>0.001:
-        st = [0,0]
-        at = getNextAction(Q)
+        episode+=1
+        epsilon = epsilon0/episode
+
+        st = [L/2,0]
+        at = int(getNextAction(Q, st, epsilon))
