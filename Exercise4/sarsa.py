@@ -50,7 +50,7 @@ class RBF:
 
 if __name__ == '__main__':
     learning_rate = 0.9
-
+    
     g = 9.8
     m = 1
     h = 1
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     simulator = sim(0.05)
     
     
-    while episode<1000:
+    while episode<1:
         episode+=1
         epsilon = epsilon0/episode
         curTime = 0
@@ -86,7 +86,7 @@ if __name__ == '__main__':
       
         while curTime<tf and st[0] < L and st[0]>0:
             # print("State: ",st)
-
+            
             stnext, rnext = simulator.step(at)
 
             if stnext[0]>=L:
