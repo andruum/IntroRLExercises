@@ -2,7 +2,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
-class CoM(object):
+class CoM(object):      # Car on Mountain
     
 
     def __init__(self,dt):
@@ -13,17 +13,29 @@ class CoM(object):
         self.dt = dt
         self.startX = self.L/2
         self.startVel = 0
-        self.direction = 1*4
+        self.velGain = 4 
+        self.direction = 1
+        self.at = self.velGain*self.direction
         self.currentX = self.startX
         self.currentV = self.startVel
         self.currentY = self.getY(self.currentX)
 
-        self.pos = []
-        self.vel = []
+        self.pos = [self.currentX]
+        self.vel = [self.currentV]
 
 
 
+    def step(self,at):
+        self.at = at*self.velGain
+        nextX = self.nextX(self.currentX,self.currentV)
+        nextV = self.nextV(self.at,self.currentX,self.currentV)
         
+        stNext = [nextX,nextV]
+        rNext = self.L-self.currentX        # Reward function 
+        self.currentX = nextX
+        self.currentV = nextV
+
+        return stNext, rNext
 
     
     def A(self,x):
@@ -40,10 +52,10 @@ class CoM(object):
 
 
     def nextX(self,xCur,vCur):
-        return xCur + self.dt*vCur
+        return xCur + self.dt*vCur  
 
     def nextV(self,input,xCur,vCur):
-        return vCur + (self.dt/self.A(xCur))*(-self.B(xCur)*pow(vCur,2)-self.C(xCur)+self.direction/self.D(xCur))
+        return vCur + (self.dt/self.A(xCur))*(-self.B(xCur)*pow(vCur,2)-self.C(xCur)+self.at/self.D(xCur))
 
     def getY(self,xCur):
         return self.h/2 *(1+math.cos((2*math.pi*xCur)/self.L))
@@ -57,16 +69,13 @@ if __name__ == '__main__':
     car = CoM(0.01)
     
 
-    for i in range(1000):
-        if(i == 0):
-            car.currentX = car.startX                                           # Sets start position
-            car.currentV = car.nextV(car.direction,car.currentX,car.currentV)   # Sets start velocity 
-            car.currentY = car.getY(car.startX)                                 # Sets start y-value
-           
-    
+    for i in range(1000):   
+        tempX = car.currentX 
         car.currentX = car.nextX(car.currentX,car.currentV)
-        car.currentV = car.nextV(car.direction,car.currentX,car.currentV)
-        car.currentY = car.getY(car.currentX)
+        car.currentV = car.nextV(car.direction,tempX,car.currentV)
+      
+
+        print(car.step(1))
     
         
         car.pos.append(car.currentX)
@@ -75,9 +84,9 @@ if __name__ == '__main__':
     # print(car.vel)
 
 
-    time = np.arange(0,10,car.dt)
-    plt.plot(time,car.pos)
-    plt.show()
+    # time = np.arange(0,10,car.dt)
+    # plt.plot(time,car.pos)
+    # plt.show()
 
     #     plt.scatter(car.currentX,car.currentY)
     #     plt.pause(0.01)

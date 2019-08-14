@@ -1,6 +1,8 @@
 import random
 import math
 import numpy as np
+from carOnAMountain import CoM as sim
+
 
 def getNextAction(Q, state, epsilon):
     Qpos = Q[1].feed(state)
@@ -10,8 +12,9 @@ def getNextAction(Q, state, epsilon):
         u = -1
     else:
         u = 1
-    if epsilon<random.uniform(0,1):
+    if epsilon>random.uniform(0,1):
         u = np.sign(random.uniform(-1,1))
+        # print("Explorer")
     return u
 
 class RBFFeature:
@@ -66,26 +69,43 @@ if __name__ == '__main__':
     episode = 0
     epsilon0 = 0.9
 
-    curTime = 0
-    while episode<10:
+    simulator = sim(0.05)
+    
+    
+    while episode<1:
         episode+=1
         epsilon = epsilon0/episode
-
+        curTime = 0
+        
+        print("Episode: ", episode, " Pos: ",simulator.currentX, " Epsilon: ",epsilon)   
+        
         st = [L/2,0]
+        simulator.currentX = simulator.startX
+        simulator.currentV = simulator.startVel
         at = int(getNextAction(Q, st, epsilon))
+      
+        while curTime<tf and st[0] < L and st[0]>0:
+            print("State: ",st)
 
-        while curTime<tf and st[0] < L:
             stnext, rnext = simulator.step(at)
 
             if stnext[0]>=L:
+                print("Goal reached")
                 W = Q[at].weights
                 W = W + alpha*(rnext-Q[at].feed(st))*Q[at].getFeatureVector(st)
                 Q[at].weights = W
                 break
-            
+
             anext = int(getNextAction(Q, stnext, epsilon))
             W = Q[at].weights
             W = W + alpha * (rnext + ksi*Q[anext].feed(stnext) - Q[at].feed(st)) * Q[at].getFeatureVector(st)
             Q[at].weights = W
             st = stnext
             at = anext
+         
+            curTime += T
+            # print(at)
+            # print("Time",curTime)
+            # print("Pos , vel",st)
+
+    # print(W)
