@@ -12,7 +12,7 @@ def getNextAction(Q, state, epsilon):
         u = -1
     else:
         u = 1
-    if epsilon>random.uniform(0,1):
+    if epsilon<random.uniform(0,1):
         u = np.sign(random.uniform(-1,1))
         # print("Explorer")
     return u
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     simulator = sim(0.05)
     
     
-    while episode<1:
+    while episode<1000:
         episode+=1
         epsilon = epsilon0/episode
         curTime = 0
@@ -85,7 +85,7 @@ if __name__ == '__main__':
         at = int(getNextAction(Q, st, epsilon))
       
         while curTime<tf and st[0] < L and st[0]>0:
-            print("State: ",st)
+            # print("State: ",st)
 
             stnext, rnext = simulator.step(at)
 
