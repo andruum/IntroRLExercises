@@ -49,7 +49,7 @@ class RBF:
         return res
 
 if __name__ == '__main__':
-    learning_rate = 1.2
+    learning_rate = 1.5
     
     g = 9.8
     m = 1
@@ -65,23 +65,30 @@ if __name__ == '__main__':
 
     Q = {-1:RBF(nx,nv,L,vm), 1:RBF(nx,nv,L,vm)}
 
+
+    NumberOfEpisodes = 50   
     episode = 0
     epsilon0 = 0.9
     curTime = 0
-
+    reward = 0
     simulator = sim(0.05)
     plot = Plotter()
 
+    
+    succesCounter = 0
+    succesrate = 0
 
-    
-    
-    while episode<20:
+    while episode<NumberOfEpisodes:
         episode+=1
         epsilon = epsilon0/episode
        
+        if episode == 0:
+            succesrate = 0
+        else: 
+            succesrate = (succesCounter/episode)*100
         
-        print("Episode: ", episode, " Pos: ",simulator.currentX, " Actions:", curTime/T)   
-        
+        print("Episode: ", episode, " Reward: ",reward, " Actions:", curTime/T, " Succesrate: ", succesrate, " %")   
+        reward = 0
         curTime = 0
         st = [L/2,0]
         simulator.currentX = simulator.startX
@@ -92,9 +99,11 @@ if __name__ == '__main__':
             # print("State: ",st)
             
             stnext, rnext = simulator.step(at)
+            reward = rnext
 
             if stnext[0]>=L:
                 print("Goal reached")
+                succesCounter += 1
                 W = Q[at].weights
                 W = W + learning_rate*(rnext-Q[at].feed(st))*Q[at].getFeatureVector(st)
                 Q[at].weights = W

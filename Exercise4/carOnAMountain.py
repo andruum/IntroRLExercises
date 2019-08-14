@@ -31,7 +31,7 @@ class CoM(object):      # Car on Mountain
         nextV = self.nextV(self.at,self.currentX,self.currentV)
         
         stNext = [nextX,nextV]
-        rNext = self.currentX**2        # Reward function 
+        rNext = self.currentX**3        # Reward function 
         self.currentX = nextX
         self.currentV = nextV
 
