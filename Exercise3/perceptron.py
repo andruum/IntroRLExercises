@@ -3,9 +3,12 @@ from copy import deepcopy
 
 import math
 import numpy as np
+import matplotlib.pyplot as plt
 
 def sigmoid(z):
     return 1/(1+math.exp(-z))
+
+
 
 class Perceptron:
 
@@ -85,8 +88,26 @@ class MLP:
 
 
 
-u = [[0,0], [0,1], [1,0], [1,1]]
-t = [[0],[1],[1],[0]]
+u = [[0,0],
+     [0,1],
+     [1,0],
+     [1,1]
+     ]
+t = [[0],
+     [1],
+     [1],
+     [0]]
+
+def genSamples():
+    ids = np.arange(4)
+    np.random.shuffle(ids)
+    res_labels = []
+    res_poses = []
+    for id in ids:
+        res_labels.append(t[id])
+        pos_with_noise = [u[id][0]+random.uniform(-0.1,0.1), u[id][1]+random.uniform(-0.1,0.1)]
+        res_poses.append(pos_with_noise)
+    return res_labels, res_poses
 
 if __name__ == '__main__':
     hidden_perc_1 = Perceptron(2,sigmoid)
@@ -95,16 +116,41 @@ if __name__ == '__main__':
 
     mlp = MLP(hidden_layer=[hidden_perc_1,hidden_perc_2], output_layer=[output_perc])
 
-    learning_rate = 0.99
-    error = 1.0
-    while error > 0.001:
-        error = 0.0
-        ids = np.arange(4)
-        np.random.shuffle(ids)
-        for i in ids:
-            v = mlp.feed(u[i])
-            error += mlp.back_propagate(t[i],learning_rate)
 
-    for i in range(4):
-        v = mlp.feed(u[i])
-        print(v)
+
+    learning_rate = 0.3
+    error = 1.0
+
+    x_data_1 = []
+    y_data_1 = []
+
+    x_data_0 = []
+    y_data_0 = []
+
+    while error > 0.01:
+        error = 0.0
+        for i in range(10):
+            labels, coords = genSamples()
+            for label,coord in zip(labels,coords):
+                v = mlp.feed(coord)
+                error += mlp.back_propagate(label,learning_rate)
+                if label[0] == 0:
+                    x_data_0.append(coord[0])
+                    y_data_0.append(coord[1])
+                else:
+                    x_data_1.append(coord[0])
+                    y_data_1.append(coord[1])
+        print(error)
+
+    plt.scatter(x_data_0, y_data_0, s=1, c="green", alpha=0.5)
+    plt.scatter(x_data_1, y_data_1, s=1, c="blue", alpha=0.5)
+
+    labels, coords = genSamples()
+    for label, coord in zip(labels, coords):
+        v = mlp.feed(coord)
+        print(label,v)
+
+    plt.title('Dataset points')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.show()
