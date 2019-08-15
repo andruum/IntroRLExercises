@@ -51,7 +51,7 @@ class RBF:
 if __name__ == '__main__':
     learning_rate = 1.5
     
-    g = 9.8
+    g = 9.82
     m = 1
     h = 1
     T = 0.05
@@ -66,13 +66,13 @@ if __name__ == '__main__':
     Q = {-1:RBF(nx,nv,L,vm), 1:RBF(nx,nv,L,vm)}
 
 
-    NumberOfEpisodes = 50   
+    NumberOfEpisodes = 20   
     episode = 0
     epsilon0 = 0.9
     curTime = 0
     reward = 0
     simulator = sim(0.05)
-    plot = Plotter()
+    plot = Plotter(L,h)
 
     
     succesCounter = 0
@@ -87,7 +87,7 @@ if __name__ == '__main__':
         else: 
             succesrate = (succesCounter/episode)*100
         
-        print("Episode: ", episode, " Reward: ",reward, " Actions:", curTime/T, " Succesrate: ", succesrate, " %")   
+        print("Episode: ",episode, " Reward: ",reward, " Actions:",curTime/T, " Succesrate: ",succesrate, " %")   
         reward = 0
         curTime = 0
         st = [L/2,0]
@@ -115,9 +115,12 @@ if __name__ == '__main__':
             Q[at].weights = W
             st = stnext
             at = anext
+            
             plot.plot(st[0])
          
             curTime += T
+
+            
             # print(at)
             # print("Time",curTime)
             # print("Pos , vel",st)

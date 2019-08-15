@@ -13,7 +13,7 @@ class CoM(object):      # Car on Mountain
         self.dt = dt
         self.startX = self.L/2
         self.startVel = 0
-        self.velGain = 4 
+        self.velGain = 4
         self.direction = 1
         self.at = self.velGain*self.direction
         self.currentX = self.startX
